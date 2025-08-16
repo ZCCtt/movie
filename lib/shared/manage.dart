@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:isar/isar.dart';
 import 'package:catmovie/app/extension.dart';
 import 'package:catmovie/builtin/maccms/maccms.dart';
+import 'package:xi/adapters/drpy.dart';
 import 'package:xi/xi.dart';
 import 'package:catmovie/isar/repo.dart';
 import 'package:catmovie/isar/schema/mirror_schema.dart';
@@ -18,7 +19,14 @@ class SpiderManage {
 
   /// 内建支持的源
   /// 一般是需要自己去实现的源
-  static List<ISpiderAdapter> builtin = list$;
+  static List<ISpiderAdapter> builtin = [
+    ...list$,
+    DrpySpider(
+      id: "ssssssb",
+      name: "凡客TV",
+      api: "看什么看。。。",
+    ),
+  ];
 
   /// 合并之后的数据
   static List<ISpiderAdapter> get data {
