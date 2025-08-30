@@ -56,6 +56,8 @@ Future<ThemeMode> runBefore() async {
   await IsarRepository().init();
   await SpiderManage.init();
   await boop.init();
+  await HopeJS.init();
+  await hopeJS.withInit();
   registerAutoInjector();
   var currTheme = IsarRepository().settingsSingleModel.themeMode;
   Brightness wrapperIfDark = Brightness.light;
