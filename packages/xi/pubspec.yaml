@@ -22,3 +22,8 @@ dependencies:
   equatable: ^2.0.7
   fjs:
     git: https://github.com/fluttercandies/fjs
+  flutter_js: ^0.8.5
+
+flutter:
+  assets:
+    - assets/js/
