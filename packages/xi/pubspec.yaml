@@ -23,6 +23,7 @@ dependencies:
   fjs:
     git: https://github.com/fluttercandies/fjs
   flutter_js: ^0.8.5
+  dart_qjson: ^1.0.2
 
 flutter:
   assets:

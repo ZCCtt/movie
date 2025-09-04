@@ -379,6 +379,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
+  dart_qjson:
+    dependency: transitive
+    description:
+      name: dart_qjson
+      sha256: "27bb2ad1a624adf55c034850c8a1d930e3283b70fb2c330b8a66e2ef28496f85"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
+  dart_qvariant:
+    dependency: transitive
+    description:
+      name: dart_qvariant
+      sha256: "28d201b42d753d785dfd8fc48422cc8464f623855ed3e445b43b5152daa3bf07"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.7"
   dart_style:
     dependency: transitive
     description:
