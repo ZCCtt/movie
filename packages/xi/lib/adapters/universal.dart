@@ -51,7 +51,10 @@ class UniversalSpider extends ISpiderAdapter {
   const $ = cheerio.load(text);
   const result = $(".top_nav.clearfix").find("li").toArray().map(el=> {
     const a = $(el).find('a')
-    return { text: a.text(), id: a.attr("href") ?? "-1" }
+    const text = a.text()
+    let id = a.attr("href") ?? "-1"
+    id = id.replace("/vodtype/", "").replace(".html", "")
+    return { text, id }
   })
   return result
 })()
