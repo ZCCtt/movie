@@ -1,0 +1,6 @@
+#!/usr/bin/env zsh
+pushd JS/bundle
+pwd
+bun run build
+popd
+cp JS/bundle/dist/cheerio.umd.js packages/xi/assets/js
