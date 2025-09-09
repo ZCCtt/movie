@@ -56,56 +56,7 @@ Future<ThemeMode> runBefore() async {
   await IsarRepository().init();
   await SpiderManage.init();
   await boop.init();
-  await HopeJS.init();
-  await hopeJS.withInit();
-  await HopeJS.init();
-  await hopeJS.withInit();
-  // {
-  //   var result = await hopeJS.eval("let r = await (async ()=> { return 2 + 5 })(); r");
-  //   var table = result.toString();
-  //   debugPrint(table);
-  // }
   await js2.init();
-  // var result = await js2.eval("1 + 2 + 12e3");
-  // debugPrint(result);
-  var result = await js2.evalSync(r"""
-(async ()=> {
-const $ = cheerio.load('<h2 class="title">Hello world</h2>');
-
-$('h2.title').text('Hello there!');
-$('h2').addClass('welcome');
-
-const xml = $.html();
-
-const text = await (await fetch("http://192.168.1.197:8080/1.json")).text();
-return xml + text;
-})()
-""");
-  debugPrint(result);
-  // await HopeJS.init();
-  // await hopeJS.withInit();
-  //     var result = await hopeJS.evalModule(
-  //         'greeting',
-  //         '''
-  //   import {greet, version} from 'greeting';
-  //   console.log(greet('Flutter'));
-  //   console.log('Version:', version);
-  //   version;
-  // '''
-  //             .trim());
-  //     debugPrint(result.toString());
-  //     var result = await hopeJS.evalModule("cheerio", """
-  // import cheerio from "cheerio";
-  // const { load } = cheerio;
-  // const b = load('<h2 class="title">Hello world</h2>');
-  // console.log(b.html());
-  // console.log("are you ok?");
-  // const a = 1;
-  // a + 12;
-  // """);
-  //     debugPrint("12");
-  //     var table = result.toString();
-  //     debugPrint(table);
   registerAutoInjector();
   var currTheme = IsarRepository().settingsSingleModel.themeMode;
   Brightness wrapperIfDark = Brightness.light;

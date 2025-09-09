@@ -5,5 +5,4 @@ export 'path.dart';
 export 'source.dart';
 export 'xid.dart';
 export 'maccms.dart';
-export 'js.dart';
 export 'js2.dart';
