@@ -27,9 +27,9 @@ class JS2 {
     return result.stringResult;
   }
 
-  Future<String> evalSync(String code) async {
+  Future<String> evalSync(String code, {Duration? timeout}) async {
     var result = await _runtime.evaluateAsync(code);
-    var promise = await _runtime.handlePromise(result);
+    var promise = await _runtime.handlePromise(result, timeout: timeout);
     return promise.stringResult;
   }
 }

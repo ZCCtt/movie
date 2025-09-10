@@ -58,7 +58,7 @@ class UniversalSpider extends ISpiderAdapter {
   })
   return result
 })()
-""");
+""", timeout: Duration(seconds: 3));
     return parseCategoryWithJSResult(result);
   }
 
@@ -80,7 +80,7 @@ class UniversalSpider extends ISpiderAdapter {
     return [{ cover, title, playlist, id: `$$id` }]
 })()
 """
-        .replaceAll(r"$$id", movieId));
+        .replaceAll(r"$$id", movieId), timeout: Duration(seconds: 3));
     return parseListWithJSResult(result)[0];
   }
 
@@ -106,7 +106,7 @@ class UniversalSpider extends ISpiderAdapter {
   return result
 })()
 """
-        .replaceAll(r"$$url", "/vodtype/${category!}-$page.html"));
+        .replaceAll(r"$$url", "/vodtype/${category!}-$page.html"), timeout: Duration(seconds: 3));
     return parseListWithJSResult(result);
   }
 
@@ -131,7 +131,7 @@ class UniversalSpider extends ISpiderAdapter {
   return result
 })()
 """
-        .replaceAll(r"$$wd", keyword));
+        .replaceAll(r"$$wd", keyword), timeout: Duration(seconds: 3));
     return [];
   }
 
