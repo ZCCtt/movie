@@ -4,6 +4,36 @@ on:
   push:
     tags:
       - "release-v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号 (例如: 1.0.0)'
+        required: true
+        default: '1.0.0'
+      build_windows:
+        description: '构建Windows版本'
+        type: boolean
+        default: true
+      build_linux:
+        description: '构建Linux版本'
+        type: boolean
+        default: true
+      build_android:
+        description: '构建Android版本'
+        type: boolean
+        default: true
+      build_ios:
+        description: '构建iOS版本'
+        type: boolean
+        default: true
+      build_macos:
+        description: '构建macOS版本'
+        type: boolean
+        default: true
+      release:
+        description: '创建GitHub Release'
+        type: boolean
+        default: false
 
 env:
   FLUTTER_VERSION: 3.35.3
@@ -13,6 +43,7 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
+    if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.build_windows) }}
 
     steps:
       - uses: actions/checkout@v4
@@ -25,8 +56,12 @@ jobs:
           ./script/fetch_git_info.ps1
           flutter pub get
           flutter pub run build_runner build
-          # dart run script/add_builtin.dart > lib/builtin/maccms/maccms.dart
-          $env:version = "${{ github.ref_name }}" -replace "^release-v", ""
+          # 设置版本号 - 根据触发方式不同处理
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $env:version = "${{ github.event.inputs.version }}"
+          } else {
+            $env:version = "${{ github.ref_name }}" -replace "^release-v", ""
+          }
           dart run script/replace_version.dart
       - name: Build windows
         run: |
@@ -50,6 +85,7 @@ jobs:
 
   build-linux:
     runs-on: ubuntu-22.04
+    if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.build_linux) }}
 
     env:
       TARBALL_NAME: catmovie-linux-x86_64.tar.gz
@@ -73,8 +109,12 @@ jobs:
       - name: Build
         run: |
           bash script/fetch_git_info.sh
-          # dart run script/add_builtin.dart > lib/builtin/maccms/maccms.dart
-          export version=$(echo "${{ github.ref_name }}" | sed 's/^release-v//')
+          # 设置版本号 - 根据触发方式不同处理
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            export version="${{ github.event.inputs.version }}"
+          else
+            export version=$(echo "${{ github.ref_name }}" | sed 's/^release-v//')
+          fi
           dart run script/replace_version.dart
           flutter build linux --release
       - name: Create tarball
@@ -88,8 +128,10 @@ jobs:
           path: build/linux/x64/release/${{ env.TARBALL_NAME }}
 
   build-and-release:
-    if: ${{ github.actor == 'd1y' }}
+    if: ${{ (github.event_name == 'push' && github.actor == 'd1y') || (github.event_name == 'workflow_dispatch' && inputs.release && github.actor == 'd1y') }}
     runs-on: macos-latest
+    needs: [build-windows, build-linux]
+    
     steps:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
@@ -115,12 +157,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build android apk (split per ABI)
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.build_android) }}
         run: |
           bash script/fetch_git_info.sh
           flutter pub get
           flutter pub run build_runner build
-          # dart run script/add_builtin.dart > lib/builtin/maccms/maccms.dart
-          export version=$(echo "${{ github.ref_name }}" | sed 's/^release-v//')
+          # 设置版本号 - 根据触发方式不同处理
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            export version="${{ github.event.inputs.version }}"
+          else
+            export version=$(echo "${{ github.ref_name }}" | sed 's/^release-v//')
+          fi
           dart run script/replace_version.dart
           # 构建分架构的APK
           flutter build apk --release --split-per-abi
@@ -130,6 +177,7 @@ jobs:
           cp build/app/outputs/flutter-apk/app-x86_64-release.apk catmovie-x86_64.apk
 
       - name: Build iOS ipa
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.build_ios) }}
         run: |
           flutter build ios --release --no-codesign
           cd build/ios/iphoneos
@@ -140,6 +188,7 @@ jobs:
           zip -r catmovie.ipa Payload
 
       - name: Build macOS
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.build_macos) }}
         run: |
           flutter config --enable-macos-desktop
           flutter build macos --release
@@ -147,23 +196,29 @@ jobs:
           zip -ry catmovie-mac.zip 小猫影视.app/*
 
       - uses: actions/download-artifact@v4
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.build_windows) }}
         with:
           name: windows
       - uses: actions/download-artifact@v4
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.build_linux) }}
         with:
           name: x86_64_linux
 
-      - uses: softprops/action-gh-release@v2
+      - name: Create Release
+        if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.release) }}
+        uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event_name == 'push' && github.ref_name || format('release-v{0}', github.event.inputs.version) }}
+          name: ${{ github.event_name == 'push' && github.ref_name || format('Release {0}', github.event.inputs.version) }}
           body_path: release-notes.txt
           prerelease: false
           files: |
-            catmovie-windows.zip
-            catmovie-linux-x86_64.tar.gz
-            catmovie-armeabi-v7a.apk
-            catmovie-arm64-v8a.apk
-            catmovie-x86_64.apk
-            build/ios/iphoneos/catmovie.ipa
-            build/macos/Build/Products/Release/catmovie-mac.zip
+            ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.build_windows) && 'catmovie-windows.zip' || '' }}
+            ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.build_linux) && 'catmovie-linux-x86_64.tar.gz' || '' }}
+            ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.build_android) && 'catmovie-armeabi-v7a.apk' || '' }}
+            ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.build_android) && 'catmovie-arm64-v8a.apk' || '' }}
+            ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.build_android) && 'catmovie-x86_64.apk' || '' }}
+            ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.build_ios) && 'build/ios/iphoneos/catmovie.ipa' || '' }}
+            ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.build_macos) && 'build/macos/Build/Products/Release/catmovie-mac.zip' || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
