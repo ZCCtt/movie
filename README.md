@@ -1,6 +1,6 @@
 <img src="design/logo_round.svg" width="120" />
 
-## 小猫影视 🐈
+## 小猫影视 🐈 
 
 使用 `Flutter` 构建, 支持 `Android` | `Windows` | `Macos` | `iOS` | `Linux`
 
