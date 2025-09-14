@@ -1,34 +1,36 @@
-name: Sync Fork with Upstream
+name: Sync with waifu-project/movie
 
 on:
   schedule:
     # 每天 UTC 时间 00:00 (即北京时间 08:00) 自动运行一次
     - cron: '0 0 * * *'
-  workflow_dispatch: # 允许在 GitHub 页面上手动触发此动作
+  workflow_dispatch: # 允许手动触发
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      # 步骤一：检出你的代码
-      - name: Checkout
+      - name: Checkout dev branch
         uses: actions/checkout@v4
+        with:
+          ref: dev # 检出你的 dev 分支
+          token: ${{ secrets.PAT_FOR_SYNC }}
 
-      # 步骤二：配置 Git 用户
       - name: Configure Git
         run: |
           git config user.name "GitHub Actions Bot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email "actions@users.noreply.github.com"
 
-      # 步骤三：添加上游仓库并合并
-      - name: Merge Upstream
+      - name: Add upstream repository
         run: |
           git remote add upstream https://github.com/waifu-project/movie.git
           git fetch upstream
-          git checkout dev # 确保你在主分支上，如果不是 main，请改为你的分支名，如 master
-          git merge upstream/dev
+
+      - name: Merge upstream changes
+        run: |
+          # 合并上游的 dev 分支到你的 dev 分支
+          git merge upstream/dev --allow-unrelated-histories --no-edit
+          
+      - name: Push changes
+        run: |
           git push origin dev
-        env:
-          # 这里需要一张具有写入权限的 Personal Access Token (PAT)
-          # 非常重要！不能用默认的 GITHUB_TOKEN，因为它无权推送到 Fork 的仓库。
-          GITHUB_TOKEN: ${{ secrets.PAT_FOR_SYNC }}
