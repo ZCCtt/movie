@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:catmovie/shared/enum.dart';
 import 'package:webplayer_embedded/webplayer_embedded.dart';
 
@@ -14,7 +14,7 @@ class SettingsIsarModel {
 
   /// 播放器内核
   @Enumerated(EnumType.ordinal)
-  VideoKernel videoKernel = VideoKernel.webview;
+  VideoKernel videoKernel = VideoKernel.mediaKit;
 
   /// 是否开启成人模式
   bool isNSFW = false;

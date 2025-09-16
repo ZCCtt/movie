@@ -5,8 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
-import 'package:isar/isar.dart';
-import 'package:loading_gifs/loading_gifs.dart';
+import 'package:isar_community/isar.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:catmovie/app/modules/home/views/mirrortable.dart';
 import 'package:catmovie/app/shared/bus.dart';
@@ -16,6 +15,7 @@ import 'package:catmovie/isar/repo.dart';
 import 'package:catmovie/shared/manage.dart';
 import 'package:catmovie/isar/schema/parse_schema.dart';
 import 'package:catmovie/shared/enum.dart';
+import 'package:nuts_activity_indicator/nuts_activity_indicator.dart';
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:pull_to_refresh_flutter3/pull_to_refresh_flutter3.dart';
 
@@ -37,15 +37,23 @@ enum UpdateSearchHistoryType {
   clean
 }
 
+Widget kActivityIndicator = NutsActivityIndicator(
+  tickCount: 9,
+  radius: 12,
+  relativeWidth: 1.24,
+  inactiveColor: Colors.white.withValues(alpha: 0.42),
+  activeColor: Colors.white,
+);
+
 Function showLoading(String msg) {
   EasyLoading.show(
     // status: msg,
-    indicator: Image.asset(cupertinoActivityIndicator, scale: 8),
     // indicator: Image.asset(
     //   "assets/loading.gif",
     //   width: 120,
     //   height: 120,
     // ),
+    indicator: kActivityIndicator,
   );
   return EasyLoading.dismiss;
 }
@@ -55,12 +63,12 @@ Future<bool> showLoadingPlaceholderTask(AsyncCallback task) async {
   try {
     Get.dialog(
       Center(
-        child: Image.asset(cupertinoActivityIndicator, scale: 8),
         // child: Image.asset(
         //   "assets/loading.gif",
         //   width: 120,
         //   height: 120,
         // ),
+        child: kActivityIndicator,
       ),
     );
     await task();

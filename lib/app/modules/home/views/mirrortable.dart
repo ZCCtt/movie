@@ -287,6 +287,7 @@ class _MirrorTableViewState extends State<MirrorTableView> {
                   boop.selection();
                 },
                 hashTable: __statusMap,
+                // FIXME: 目前看看, 删除源的逻辑暂时不需要了, 可以考虑将这里删除
                 onDel: (context) {
                   showCupertinoDialog(
                     builder: (context) => CupertinoAlertDialog(
@@ -353,6 +354,7 @@ class MirrorCard extends StatelessWidget {
 
   final bool current;
 
+  @Deprecated('删除源的逻辑暂时不需要了, 可以考虑将这里删除')
   final SlidableActionCallback? onDel;
 
   final VoidCallback onTap;
@@ -389,112 +391,93 @@ class MirrorCard extends StatelessWidget {
         minHeight: minHeight,
         maxHeight: maxHeight,
       ),
-      child: Material(
-        child: Slidable(
-          enabled: enabled,
-          key: ObjectKey(item),
-          endActionPane: ActionPane(
-            motion: const ScrollMotion(),
-            children: [
-              SlidableAction(
-                onPressed: onDel,
-                backgroundColor: const Color(0xFFFE4A49),
-                foregroundColor: Colors.white,
-                icon: CupertinoIcons.delete,
-                label: '删除',
+      child: Zoom(
+        scaleRatio: .99,
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: borderColor,
               ),
-            ],
+            ),
           ),
-          child: Zoom(
-            scaleRatio: .99,
-            onTap: onTap,
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: borderColor,
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const SizedBox(width: 12),
+              Builder(builder: (context) {
+                // NOTE(d1y): 这里的 logo 展示不太好看, 所以先不要了, 等待展示更好的图标
+                var logo = item.meta.logo;
+                if (logo.isEmpty || true) {
+                  logo = "${item.meta.domain}/favicon.ico";
+                }
+                return CachedNetworkImage(
+                  fit: BoxFit.cover,
+                  imageUrl: logo,
+                  errorWidget: (context, url, error) => const Icon(
+                    CupertinoIcons.cube_box,
+                    size: 42,
                   ),
+                  placeholder: (context, url) => Center(child: const CupertinoActivityIndicator()),
+                  width: 42,
+                );
+              }),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  spacing: _desc.isEmpty ? 0 : 3,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _title,
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 14,
+                        decoration: TextDecoration.none,
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                    _desc.isEmpty
+                        ? const SizedBox.shrink()
+                        : Text(
+                            _desc,
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 9,
+                              decoration: TextDecoration.none,
+                              fontWeight: FontWeight.w300,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                    Builder(builder: (context) {
+                      var status = item.meta.status
+                          ? MovieStatusType.available
+                          : MovieStatusType.unavailable;
+                      var cacheStatus = hashTable[item.meta.id] ?? true;
+                      return MovieStatusWidget(
+                        status: status,
+                        cacheStatus: cacheStatus,
+                      );
+                    }),
+                  ],
                 ),
               ),
-              padding: const EdgeInsets.symmetric(
-                vertical: 6,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Row(
                 children: [
-                  const SizedBox(width: 12),
-                  Builder(builder: (context) {
-                    // NOTE(d1y): 这里的 logo 展示不太好看, 所以先不要了, 等待展示更好的图标
-                    var logo = item.meta.logo;
-                    if (logo.isEmpty || true) {
-                      logo = "${item.meta.domain}/favicon.ico";
-                    }
-                    return CachedNetworkImage(
-                      fit: BoxFit.cover,
-                      imageUrl: logo,
-                      errorWidget: (context, url, error) => const Icon(
-                        CupertinoIcons.cube_box,
-                        size: 42,
-                      ),
-                      width: 42,
-                    );
-                  }),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      spacing: _desc.isEmpty ? 0 : 3,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _title,
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 14,
-                            decoration: TextDecoration.none,
-                            fontWeight: FontWeight.w300,
-                          ),
-                        ),
-                        _desc.isEmpty
-                            ? const SizedBox.shrink()
-                            : Text(
-                                _desc,
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontSize: 9,
-                                  decoration: TextDecoration.none,
-                                  fontWeight: FontWeight.w300,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                        Builder(builder: (context) {
-                          var status = item.meta.status
-                              ? MovieStatusType.available
-                              : MovieStatusType.unavailable;
-                          var cacheStatus = hashTable[item.meta.id] ?? true;
-                          return MovieStatusWidget(
-                            status: status,
-                            cacheStatus: cacheStatus,
-                          );
-                        }),
-                      ],
-                    ),
+                  Icon(
+                    current ? Icons.done : CupertinoIcons.right_chevron,
+                    color: textColor,
                   ),
-                  Row(
-                    children: [
-                      Icon(
-                        current ? Icons.done : CupertinoIcons.right_chevron,
-                        color: textColor,
-                      ),
-                      const SizedBox(
-                        width: 8,
-                      ),
-                    ],
+                  const SizedBox(
+                    width: 8,
                   ),
                 ],
               ),
-            ),
+            ],
           ),
         ),
       ),
